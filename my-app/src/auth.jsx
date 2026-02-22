@@ -2,23 +2,18 @@ import { useState } from "react";
 import "./App.css";
 import logoSrc from "/img/a-sleek-modern-logo-design-featuring-the_goDenOD7TPS-KtuXM3BUnA_RzVYVD7bSjiL0zKDsLJ0uw-Photoroom.png";
 
-const THEMES = {
- 
-  frost: {
-    start: "#004e92",
-    stop: "#000d7a",
-    bgColor: "#00052d",
-    color: "rgba(255,255,255,0.8)",
-    inputBg: "rgba(0,0,0,0.4)",
-    inputIconColor: "rgba(255,255,255,0.3)",
-    inputFocusIconColor: "#24b7ff",
-    inputFocusBg: "rgba(0,0,0,0.5)",
-    placeholderColor: "rgba(255,255,255,0.7)",
-    submitColor: "#fff",
-  }
+const THEME = {
+  start: "#004e92",
+  stop: "#000d7a",
+  bgColor: "#00052d",
+  color: "rgba(255,255,255,0.8)",
+  inputBg: "rgba(0,0,0,0.4)",
+  inputIconColor: "rgba(255,255,255,0.3)",
+  inputFocusIconColor: "#24b7ff",
+  inputFocusBg: "rgba(0,0,0,0.5)",
+  placeholderColor: "rgba(255,255,255,0.7)",
+  submitColor: "#fff",
 };
-
-const THEME_KEYS = [ "frost"];
 
 // --- SVG Icon Components ---
 const UserIcon = ({ color }) => (
@@ -39,50 +34,14 @@ const ArrowIcon = ({ color }) => (
   </svg>
 );
 
-const CheckIcon = ({ color }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill={color} xmlns="http://www.w3.org/2000/svg">
-    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-  </svg>
-);
-
-// --- ThemeSwatch Component ---
-function ThemeSwatch({ themeName, isActive, onClick, isRotating }) {
-  const theme = THEMES[themeName];
-  const label = themeName.charAt(0).toUpperCase() + themeName.slice(1);
-
-//   return (
-//      <button
-//        onClick={() => !isRotating && onClick(themeName)}
-//        title={label}
-//        style={{
-//     //     width: 30,
-//     //     height: 30,
-//     //     borderRadius: 4,
-//     //     border: "none",
-//     //     background: `linear-gradient(225deg, ${theme.start}, ${theme.stop})`,
-//     //     cursor: isRotating ? "not-allowed" : "pointer",
-//     //     display: "flex",
-//     //     alignItems: "center",
-//     //     justifyContent: "center",
-//     //     transition: "transform 200ms ease-in-out",
-//     //     flexShrink: 0,
-//     //   }}
-//     //   onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.transform = "scale(1.2)"; }}
-//     //   onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
-//     // >
-//     //   {isActive && <CheckIcon color="#fff" />}
-//     // </button>
-//   );
-}
-
 // --- InputField Component ---
-function InputField({ type, placeholder, icon, focusIconColor, inputBg, inputFocusBg, inputIconColor, placeholderColor, color }) {
+function InputField({ type, placeholder, icon }) {
   const [focused, setFocused] = useState(false);
   const uid = `login-input-${type}`;
 
   return (
     <div style={{ marginBottom: 15, position: "relative" }}>
-      <style>{`.${uid}::placeholder { color: ${placeholderColor}; opacity: 1; }`}</style>
+      <style>{`.${uid}::placeholder { color: ${THEME.placeholderColor}; opacity: 1; }`}</style>
       <input
         type={type}
         placeholder={placeholder}
@@ -91,10 +50,10 @@ function InputField({ type, placeholder, icon, focusIconColor, inputBg, inputFoc
         onBlur={() => setFocused(false)}
         style={{
           width: "100%",
-          backgroundColor: focused ? inputFocusBg : inputBg,
+          backgroundColor: focused ? THEME.inputFocusBg : THEME.inputBg,
           border: "none",
           borderRadius: 6,
-          color,
+          color: THEME.color,
           fontSize: 16,
           padding: "14px 44px 14px 12px",
           fontFamily: "Poppins, sans-serif",
@@ -115,8 +74,8 @@ function InputField({ type, placeholder, icon, focusIconColor, inputBg, inputFoc
         }}
       >
         {icon === "user"
-          ? <UserIcon color={focused ? focusIconColor : inputIconColor} />
-          : <KeyIcon color={focused ? focusIconColor : inputIconColor} />}
+          ? <UserIcon color={focused ? THEME.inputFocusIconColor : THEME.inputIconColor} />
+          : <KeyIcon color={focused ? THEME.inputFocusIconColor : THEME.inputIconColor} />}
       </span>
     </div>
   );
@@ -124,20 +83,6 @@ function InputField({ type, placeholder, icon, focusIconColor, inputBg, inputFoc
 
 // --- Login Component ---
 function Login() {
-  const [activeTheme, setActiveTheme] = useState("frost");
-  const [displayTheme, setDisplayTheme] = useState("frost");
-  const [isRotating, setIsRotating] = useState(false);
-
-  const theme = THEMES[displayTheme];
-
-  const handleThemeChange = (newTheme) => {
-    if (newTheme === activeTheme || isRotating) return;
-    setIsRotating(true);
-    setActiveTheme(newTheme);
-    setTimeout(() => setDisplayTheme(newTheme), 650);
-    setTimeout(() => setIsRotating(false), 1500);
-  };
-
   return (
     <>
       <link
@@ -146,12 +91,6 @@ function Login() {
       />
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        @keyframes rotate3d {
-          0%   { transform: rotate3d(0, 0, 0, 0deg); }
-          100% { transform: rotate3d(0, 1, 0, 360deg); }
-        }
-        .form-rotating { animation: rotate3d 1200ms ease forwards; }
 
         @keyframes float1 {
           0%, 100% { transform: translateY(0px) scale(1); }
@@ -172,20 +111,18 @@ function Login() {
       {/* Full-page background */}
       <div
         style={{
-          backgroundColor: theme.bgColor,
-          minHeight: "100vh",
-          width: "100vw",
+          backgroundColor: THEME.bgColor,
+          minHeight: "91vh",
+          width: "80vw",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           fontFamily: "Poppins, sans-serif",
-          transition: "background-color 300ms ease-in-out",
           padding: "24px",
         }}
       >
         {/* Laptop-sized card: two-column split */}
         <div
-          className={isRotating ? "form-rotating" : ""}
           style={{
             display: "flex",
             width: "min(900px, 100%)",
@@ -193,14 +130,13 @@ function Login() {
             borderRadius: 16,
             overflow: "hidden",
             boxShadow: "0 32px 80px rgba(0,0,0,0.45)",
-            transformStyle: "preserve-3d",
           }}
         >
           {/* LEFT PANEL: decorative branding */}
           <div
             style={{
               flex: "0 0 45%",
-              background: `linear-gradient(225deg, ${theme.start} 16%, ${theme.stop} 100%)`,
+              background: `linear-gradient(225deg, ${THEME.start} 16%, ${THEME.stop} 100%)`,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -208,7 +144,6 @@ function Login() {
               padding: "48px 40px",
               position: "relative",
               overflow: "hidden",
-              transition: "background 300ms ease-in-out",
             }}
           >
             {/* Decorative blurred orbs */}
@@ -231,7 +166,7 @@ function Login() {
             {/* Brand content */}
             <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
 
-              {/* LOGO — no box, just the image */}
+              {/* LOGO — bare image, no box wrapper */}
               <img
                 src={logoSrc}
                 alt="Sponza logo"
@@ -240,21 +175,20 @@ function Login() {
                   height: "auto",
                   objectFit: "contain",
                   display: "block",
-                  
+                  margin: "0 auto 10px",
                 }}
               />
 
-              <p align="" style={{
+            <p align="" style={{
                 color: "rgba(255,255,255,0.65)", fontSize: 14,
-                lineHeight: 1.6, maxWidth: 290,
+                lineHeight: 1, maxWidth: 290,
               }}>
-                Fueling Events. Empowering Ideas...
-            
+                  Fueling Events. Empowering Ideas
               </p>
 
               <div style={{
-                width: 40, height: 2, background: "rgba(255,255,255,0.3)",
-                borderRadius: 2, margin: "8px auto 0",
+                width: 45, height: 2, background: "rgba(255,255,255,0.3)",
+                borderRadius: 2, margin: "10px auto 0",
               }} />
             </div>
           </div>
@@ -263,56 +197,30 @@ function Login() {
           <div
             style={{
               flex: 1,
-              backgroundColor: theme.bgColor,
+              backgroundColor: THEME.bgColor,
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
               padding: "36px 44px 32px",
-              transition: "background-color 300ms ease-in-out",
             }}
           >
-            {/* Top: Theme Picker */}
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <div style={{
-                backgroundColor: "rgba(0,0,0,0.35)",
-                borderRadius: 8, display: "flex", gap: 8, padding: "6px",
-              }}>
-                {THEME_KEYS.map((name) => (
-                  <ThemeSwatch
-                    key={name}
-                    themeName={name}
-                    isActive={activeTheme === name}
-                    onClick={handleThemeChange}
-                    isRotating={isRotating}
-                  />
-                ))}
-              </div>
-            </div>
+            {/* Top spacer — no theme picker anymore */}
+            <div />
 
             {/* Middle: Form fields */}
             <div style={{ marginTop: 32 }}>
               <h1 style={{
-                color: theme.color, fontSize: 30, fontWeight: 700,
+                color: THEME.color, fontSize: 30, fontWeight: 700,
                 letterSpacing: "-0.5px", marginBottom: 6,
               }}>
-                Welcome 
+                Welcome
               </h1>
               <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 14, marginBottom: 36 }}>
                 Enter your credentials to continue.
               </p>
 
-              <InputField
-                type="text" placeholder="Enter your username" icon="user"
-                color={theme.color} inputBg={theme.inputBg} inputFocusBg={theme.inputFocusBg}
-                inputIconColor={theme.inputIconColor} focusIconColor={theme.inputFocusIconColor}
-                placeholderColor={theme.placeholderColor}
-              />
-              <InputField
-                type="password" placeholder="Enter your password" icon="key"
-                color={theme.color} inputBg={theme.inputBg} inputFocusBg={theme.inputFocusBg}
-                inputIconColor={theme.inputIconColor} focusIconColor={theme.inputFocusIconColor}
-                placeholderColor={theme.placeholderColor}
-              />
+              <InputField type="text" placeholder="Enter your username" icon="user" />
+              <InputField type="password" placeholder="Enter your password" icon="key" />
 
               <div style={{ textAlign: "right", marginTop: -6, marginBottom: 28 }}>
                 <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, cursor: "pointer" }}>
@@ -324,7 +232,7 @@ function Login() {
                 type="button"
                 className="signin-btn"
                 style={{
-                  background: `linear-gradient(225deg, ${theme.start}, ${theme.stop})`,
+                  background: `linear-gradient(225deg, ${THEME.start}, ${THEME.stop})`,
                   border: "none", borderRadius: 8, color: "#fff", cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 16, fontWeight: 600, fontFamily: "Poppins, sans-serif",

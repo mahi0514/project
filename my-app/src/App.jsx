@@ -3,61 +3,85 @@
 //  import Home from "./home.jsx";
 // import logoSrc from "/img/a-sleek-modern-logo-design-featuring-the_goDenOD7TPS-KtuXM3BUnA_RzVYVD7bSjiL0zKDsLJ0uw-Photoroom.png";
 // import Login from "./auth.jsx";
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { PublicLayout } from './components/layout/PublicLayout.tsx';
-import { DashboardLayout } from './components/layout/DashboardLayout.tsx';
-import { LandingPage } from './pages/public/LandingPage.tsx';
-import { LoginPage } from './pages/auth/LoginPage.tsx';
-import { RegisterPage } from './pages/auth/RegisterPage.tsx';
-import { CollegeDashboard } from './pages/college/CollegeDashboard.tsx';
-import { CreateEvent } from './pages/college/CreateEvent.tsx';
-import { MyEvents } from './pages/college/MyEvents.tsx';
-import { Requests } from './pages/college/Requests.tsx';
-import { SponsorDashboard } from './pages/sponsor/SponsorDashboard.tsx';
-import { BrowseEvents } from './pages/sponsor/BrowseEvents.tsx';
-import { AdminDashboard } from './pages/admin/AdminDashboard.tsx';
+import { Toaster } from "./components/ui/toaster"
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClientInstance } from './lib/query-client'
+import NavigationTracker from './lib/NavigationTracker'
+import { pagesConfig } from './pages.config'
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import PageNotFound from './lib/PageNotFound';
+import { AuthProvider, useAuth } from './lib/AuthContext';
+import UserNotRegisteredError from './components/UserNotRegisteredError';
 
-function App() {
+const { Pages, Layout, mainPage } = pagesConfig;
+const mainPageKey = mainPage ?? Object.keys(Pages)[0];
+const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
+
+const LayoutWrapper = ({ children, currentPageName }) => Layout ?
+  <Layout currentPageName={currentPageName}>{children}</Layout>
+  : <>{children}</>;
+
+const AuthenticatedApp = () => {
+  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+
+  // Show loading spinner while checking app public settings or auth
+  if (isLoadingPublicSettings || isLoadingAuth) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // Handle authentication errors
+  if (authError) {
+    if (authError.type === 'user_not_registered') {
+      return <UserNotRegisteredError />;
+    } else if (authError.type === 'auth_required') {
+      // Redirect to login automatically
+      navigateToLogin();
+      return null;
+    }
+  }
+
+  // Render the main app
   return (
     <Routes>
-      {/* Public Routes */}
-      <Route element={<PublicLayout />}>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/browse" element={<BrowseEvents />} />
-      </Route>
-
-      {/* Dashboard Routes */}
-      <Route element={<DashboardLayout />}>
-        {/* College Routes */}
-        <Route path="/college/dashboard" element={<CollegeDashboard />} />
-        <Route path="/college/create-event" element={<CreateEvent />} />
-        <Route path="/college/events" element={<MyEvents />} />
-        <Route path="/college/requests" element={<Requests />} />
-        <Route path="/college/payments" element={<div className="p-6">Payments Page (Coming Soon)</div>} />
-        <Route path="/college/profile" element={<div className="p-6">Profile Page (Coming Soon)</div>} />
-
-        {/* Sponsor Routes */}
-        <Route path="/sponsor/dashboard" element={<SponsorDashboard />} />
-        <Route path="/sponsor/browse" element={<BrowseEvents />} />
-        <Route path="/sponsor/history" element={<div className="p-6">History Page (Coming Soon)</div>} />
-        <Route path="/sponsor/profile" element={<div className="p-6">Profile Page (Coming Soon)</div>} />
-
-        {/* Admin Routes */}
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<div className="p-6">Manage Users (Coming Soon)</div>} />
-        <Route path="/admin/events" element={<div className="p-6">Manage Events (Coming Soon)</div>} />
-        <Route path="/admin/monitoring" element={<div className="p-6">Monitoring (Coming Soon)</div>} />
-        <Route path="/admin/reports" element={<div className="p-6">Reports (Coming Soon)</div>} />
-      </Route>
-
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="/" element={
+        <LayoutWrapper currentPageName={mainPageKey}>
+          <MainPage />
+        </LayoutWrapper>
+      } />
+      {Object.entries(Pages).map(([path, Page]) => (
+        <Route
+          key={path}
+          path={`/${path}`}
+          element={
+            <LayoutWrapper currentPageName={path}>
+              <Page />
+            </LayoutWrapper>
+          }
+        />
+      ))}
+      <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
+};
+
+
+function App() {
+
+  return (
+    <AuthProvider>
+      <QueryClientProvider client={queryClientInstance}>
+        <Router>
+          <NavigationTracker />
+          <AuthenticatedApp />
+        </Router>
+        <Toaster />
+      </QueryClientProvider>
+    </AuthProvider>
+  )
 }
 
-export default App;
-
+export default App 
