@@ -20,21 +20,29 @@ export default function AdminReports() {
     const [timeRange, setTimeRange] = useState('6months');
 
     useEffect(() => {
+        // ✅ Check sessionStorage for admin unlock
+        const adminUnlocked = sessionStorage.getItem('admin_unlocked') === 'true';
+        if (!adminUnlocked) {
+            navigate(createPageUrl('AdminPanel'));
+            return;
+        }
         const auth = localStorage.getItem('sponza_auth');
-        if (!auth) {
-            navigate(createPageUrl('SignIn'));
-            return;
+        if (auth) {
+            const parsed = JSON.parse(auth);
+            setUser(parsed);
+        } else {
+            setUser({
+                id: 'admin-1',
+                name: 'Admin',
+                email: 'admin@sponza.com',
+                role: 'admin',
+            });
         }
-        const parsed = JSON.parse(auth);
-        if (parsed.role !== 'admin') {
-            navigate(createPageUrl('Home'));
-            return;
-        }
-        setUser(parsed);
     }, [navigate]);
 
     const handleLogout = () => {
         localStorage.removeItem('sponza_auth');
+        sessionStorage.removeItem('admin_unlocked'); // ✅ Clear session on logout
         navigate(createPageUrl('Home'));
     };
 
@@ -46,7 +54,6 @@ export default function AdminReports() {
         { label: 'Reports', icon: BarChart3, page: 'AdminReports' },
     ];
 
-    // Dummy chart data
     const revenueData = [
         { month: 'Jan', revenue: 125000, events: 12 },
         { month: 'Feb', revenue: 180000, events: 18 },
@@ -174,7 +181,6 @@ export default function AdminReports() {
                         </div>
 
                         <div className="grid lg:grid-cols-2 gap-8 mb-8">
-                            {/* Revenue Chart */}
                             <Card className="p-6">
                                 <h2 className="text-xl font-bold text-[#1F2937] mb-6">Revenue Trend</h2>
                                 <div className="h-80">
@@ -205,7 +211,6 @@ export default function AdminReports() {
                                 </div>
                             </Card>
 
-                            {/* Events by Category */}
                             <Card className="p-6">
                                 <h2 className="text-xl font-bold text-[#1F2937] mb-6">Events by Category</h2>
                                 <div className="h-80">
@@ -242,7 +247,6 @@ export default function AdminReports() {
                             </Card>
                         </div>
 
-                        {/* Events Trend */}
                         <Card className="p-6">
                             <h2 className="text-xl font-bold text-[#1F2937] mb-6">Events Created per Month</h2>
                             <div className="h-80">
