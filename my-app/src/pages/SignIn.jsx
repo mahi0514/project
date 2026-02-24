@@ -1,12 +1,82 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from "C:/Users/USER/sponza/project/my-app/src/components/ui/button";
-import { Input } from "C:/Users/USER/sponza/project/my-app/src/components/ui/input";
-import { Label } from "C:/Users/USER/sponza/project/my-app/src/components/ui/label";
-import { Card } from "C:/Users/USER/sponza/project/my-app/src/components/ui/card";
-import { Sparkles, Mail, Lock, Eye, EyeOff, GraduationCap, Building2, Shield, ArrowRight } from 'lucide-react';
+import { GraduationCap, Building2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { createPageUrl } from 'C:/Users/USER/sponza/project/my-app/src/utils';
 import { dummyUsers } from 'C:/Users/USER/sponza/project/my-app/src/components/data/dummyData';
+import logoSrc from 'C:/Users/USER/sponza/project/my-app/public/img/a-sleek-modern-logo-design-featuring-the_goDenOD7TPS-KtuXM3BUnA_RzVYVD7bSjiL0zKDsLJ0uw-Photoroom.png';
+
+const THEME = {
+    start: "#004e92",
+    stop: "#000d7a",
+    bgColor: "#00052d",
+    color: "rgba(255,255,255,0.8)",
+    inputBg: "rgba(0,0,0,0.4)",
+    inputIconColor: "rgba(255,255,255,0.3)",
+    inputFocusIconColor: "#24b7ff",
+    inputFocusBg: "rgba(0,0,0,0.5)",
+    placeholderColor: "rgba(255,255,255,0.7)",
+};
+
+const ArrowIcon = ({ color }) => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill={color}>
+        <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" />
+    </svg>
+);
+
+function StyledInput({ type, placeholder, icon, value, onChange, showToggle, onToggle, showPassword }) {
+    const [focused, setFocused] = useState(false);
+    const inputType = showToggle ? (showPassword ? 'text' : 'password') : type;
+
+    return (
+        <div style={{ marginBottom: 15, position: "relative" }}>
+            <style>{`.styled-input-${type}::placeholder { color: ${THEME.placeholderColor}; opacity: 1; }`}</style>
+            <span style={{
+                position: "absolute", left: 13, top: "50%",
+                transform: "translateY(-50%)", pointerEvents: "none",
+                display: "flex", alignItems: "center", zIndex: 1,
+            }}>
+                {icon}
+            </span>
+            <input
+                type={inputType}
+                placeholder={placeholder}
+                value={value}
+                onChange={onChange}
+                className={`styled-input-${type}`}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                required
+                style={{
+                    width: "100%",
+                    backgroundColor: focused ? THEME.inputFocusBg : THEME.inputBg,
+                    border: "none",
+                    borderRadius: 6,
+                    color: THEME.color,
+                    fontSize: 16,
+                    padding: "14px 44px",
+                    fontFamily: "Poppins, sans-serif",
+                    outline: "none",
+                    transition: "all 250ms ease-in-out",
+                    boxSizing: "border-box",
+                }}
+            />
+            {showToggle && (
+                <button
+                    type="button"
+                    onClick={onToggle}
+                    style={{
+                        position: "absolute", right: 13, top: "50%",
+                        transform: "translateY(-50%)", background: "none",
+                        border: "none", cursor: "pointer", display: "flex",
+                        alignItems: "center", color: "rgba(255,255,255,0.4)",
+                    }}
+                >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+            )}
+        </div>
+    );
+}
 
 export default function SignIn() {
     const navigate = useNavigate();
@@ -17,166 +87,285 @@ export default function SignIn() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    // ✅ CHANGE 1: Removed admin from roles array
     const roles = [
         { id: 'college', label: 'College', icon: GraduationCap, desc: 'Event Organizer' },
         { id: 'sponsor', label: 'Sponsor', icon: Building2, desc: 'Company' },
-        { id: 'admin', label: 'Admin', icon: Shield, desc: 'Platform Admin' },
     ];
 
     const handleLogin = (e) => {
         e.preventDefault();
         setError('');
         setLoading(true);
-
         setTimeout(() => {
-            // Simulate login
             const user = dummyUsers[role];
             if (user) {
                 localStorage.setItem('sponza_auth', JSON.stringify({ ...user, role }));
-                
-                // Redirect based on role
-                if (role === 'college') {
-                    navigate(createPageUrl('CollegeDashboard'));
-                } else if (role === 'sponsor') {
-                    navigate(createPageUrl('SponsorDashboard'));
-                } else {
-                    navigate(createPageUrl('AdminPanel'));
-                }
+                // ✅ CHANGE 2: Removed admin redirect, only college and sponsor
+                if (role === 'college') navigate(createPageUrl('CollegeDashboard'));
+                else if (role === 'sponsor') navigate(createPageUrl('SponsorDashboard'));
             }
             setLoading(false);
         }, 1000);
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#F8FAFC] to-[#E2E8F0] flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
-                {/* Logo */}
-                <Link to={createPageUrl('Home')} className="flex items-center justify-center gap-2 mb-8">
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#1E3A8A] to-[#22C55E] rounded-2xl flex items-center justify-center">
-                        <Sparkles className="w-7 h-7 text-white" />
-                    </div>
-                    <span className="text-3xl font-bold text-[#1E3A8A]">Sponza</span>
-                </Link>
+        <>
+            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+            <style>{`
+                *, *::before, *::after { box-sizing: border-box; }
+                @keyframes float1 {
+                    0%, 100% { transform: translateY(0px) scale(1); }
+                    50% { transform: translateY(-18px) scale(1.04); }
+                }
+                @keyframes float2 {
+                    0%, 100% { transform: translateY(0px) scale(1); }
+                    50% { transform: translateY(14px) scale(0.97); }
+                }
+                .orb1 { animation: float1 6s ease-in-out infinite; }
+                .orb2 { animation: float2 8s ease-in-out infinite; }
+                .orb3 { animation: float1 10s ease-in-out infinite 2s; }
+                .signin-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+                .signin-btn { transition: opacity 200ms, transform 200ms; }
+                .role-btn:hover { border-color: rgba(255,255,255,0.3) !important; }
+            `}</style>
 
-                <Card className="p-8 shadow-xl border-0">
-                    <div className="text-center mb-8">
-                        <h1 className="text-2xl font-bold text-[#1F2937] mb-2">Welcome Back</h1>
-                        <p className="text-slate-600">Sign in to your account</p>
+            <div style={{
+                backgroundColor: THEME.bgColor,
+                minHeight: "100vh",
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontFamily: "Poppins, sans-serif",
+                padding: "24px",
+            }}>
+                <div style={{
+                    display: "flex",
+                    width: "min(960px, 100%)",
+                    minHeight: 580,
+                    borderRadius: 16,
+                    overflow: "hidden",
+                    boxShadow: "0 32px 80px rgba(0,0,0,0.45)",
+                }}>
+
+                    {/* ── LEFT PANEL ── */}
+                    <div style={{
+                        flex: "0 0 42%",
+                        background: `linear-gradient(225deg, ${THEME.start} 16%, ${THEME.stop} 100%)`,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "48px 40px",
+                        position: "relative",
+                        overflow: "hidden",
+                    }}>
+                        <div className="orb1" style={{
+                            position: "absolute", top: "10%", left: "10%",
+                            width: 160, height: 160, borderRadius: "50%",
+                            background: "rgba(255,255,255,0.08)", filter: "blur(2px)",
+                        }} />
+                        <div className="orb2" style={{
+                            position: "absolute", bottom: "12%", right: "8%",
+                            width: 220, height: 220, borderRadius: "50%",
+                            background: "rgba(255,255,255,0.06)", filter: "blur(4px)",
+                        }} />
+                        <div className="orb3" style={{
+                            position: "absolute", top: "55%", left: "30%",
+                            width: 90, height: 90, borderRadius: "50%",
+                            background: "rgba(255,255,255,0.1)",
+                        }} />
+
+                        <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
+                            <Link to={createPageUrl('Home')}>
+                                <img
+                                    src={logoSrc}
+                                    alt="Sponza logo"
+                                    style={{
+                                        width: 260,
+                                        height: "auto",
+                                        objectFit: "contain",
+                                        display: "block",
+                                        margin: "0 auto 16px",
+                                    }}
+                                />
+                            </Link>
+
+                            <p style={{
+                                color: "rgba(255,255,255,0.65)", fontSize: 14,
+                                lineHeight: 1.5, maxWidth: 240, margin: "0 auto",
+                            }}>
+                                Fueling Events. Empowering Ideas.
+                            </p>
+
+                            <div style={{
+                                width: 45, height: 2,
+                                background: "rgba(255,255,255,0.3)",
+                                borderRadius: 2, margin: "16px auto 0",
+                            }} />
+
+                            <Link to={createPageUrl('Home')} style={{
+                                display: "inline-block", marginTop: 48,
+                                color: "rgba(255,255,255,0.5)", fontSize: 15
+                            }}>
+                                ← Back to Home
+                            </Link>
+                        </div>
                     </div>
 
-                    {/* Role Selection */}
-                    <div className="grid grid-cols-3 gap-3 mb-8">
-                        {roles.map((r) => (
+                    {/* ── RIGHT PANEL ── */}
+                    <div style={{
+                        flex: 1,
+                        backgroundColor: THEME.bgColor,
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        padding: "40px 44px",
+                        overflowY: "auto",
+                    }}>
+                        <h1 style={{
+                            color: THEME.color, fontSize: 28, fontWeight: 700,
+                            letterSpacing: "-0.5px", marginBottom: 4,
+                            textAlign: "center",
+                        }}>
+                            Welcome Back
+                        </h1>
+                        <p style={{
+                            color: "rgba(255,255,255,0.45)", fontSize: 14,
+                            marginBottom: 28, textAlign: "center",
+                        }}>
+                            Login in to your account
+                        </p>
+
+                        {/* ✅ CHANGE 3: Role grid now 2 columns since admin removed */}
+                        <div style={{
+                            display: "grid", gridTemplateColumns: "1fr 1fr",
+                            gap: 12, marginBottom: 28,
+                        }}>
+                            {roles.map((r) => {
+                                const Icon = r.icon;
+                                const isActive = role === r.id;
+                                return (
+                                    <button
+                                        key={r.id}
+                                        type="button"
+                                        className="role-btn"
+                                        onClick={() => setRole(r.id)}
+                                        style={{
+                                            padding: "14px 8px",
+                                            borderRadius: 10,
+                                            border: `2px solid ${isActive ? '#24b7ff' : 'rgba(255,255,255,0.1)'}`,
+                                            background: isActive ? 'rgba(36,183,255,0.1)' : 'rgba(255,255,255,0.03)',
+                                            cursor: "pointer",
+                                            transition: "all 200ms",
+                                            textAlign: "center",
+                                        }}
+                                    >
+                                        <Icon
+                                            size={22}
+                                            color={isActive ? '#24b7ff' : 'rgba(255,255,255,0.35)'}
+                                            style={{ margin: "0 auto 6px" }}
+                                        />
+                                        <p style={{
+                                            fontSize: 13, fontWeight: 600, margin: 0,
+                                            color: isActive ? '#24b7ff' : 'rgba(255,255,255,0.55)',
+                                            fontFamily: "Poppins, sans-serif",
+                                        }}>{r.label}</p>
+                                        <p style={{
+                                            fontSize: 11, margin: 0,
+                                            color: "rgba(255,255,255,0.3)",
+                                            fontFamily: "Poppins, sans-serif",
+                                        }}>{r.desc}</p>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <form onSubmit={handleLogin}>
+                            <StyledInput
+                                type="email"
+                                placeholder="Enter your email"
+                                icon={<Mail size={18} color="rgba(255,255,255,0.3)" />}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                            <StyledInput
+                                type="password"
+                                placeholder="Enter your password"
+                                icon={<Lock size={18} color="rgba(255,255,255,0.3)" />}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                showToggle={true}
+                                onToggle={() => setShowPassword(!showPassword)}
+                                showPassword={showPassword}
+                            />
+
+                            <div style={{
+                                display: "flex", justifyContent: "space-between",
+                                alignItems: "center", marginBottom: 24, marginTop: -4,
+                            }}>
+                                <label style={{
+                                    display: "flex", alignItems: "center", gap: 8,
+                                    color: "rgba(255,255,255,0.45)", fontSize: 13, cursor: "pointer",
+                                }}>
+                                    <input type="checkbox" style={{ accentColor: "#24b7ff" }} />
+                                    Remember me
+                                </label>
+                                <span style={{
+                                    color: "rgba(255,255,255,0.4)", fontSize: 13, cursor: "pointer",
+                                }}>
+                                    Forgot password?
+                                </span>
+                            </div>
+
+                            {error && (
+                                <div style={{
+                                    padding: "10px 14px", marginBottom: 16,
+                                    background: "rgba(239,68,68,0.1)",
+                                    border: "1px solid rgba(239,68,68,0.3)",
+                                    borderRadius: 8, color: "#f87171", fontSize: 14,
+                                }}>
+                                    {error}
+                                </div>
+                            )}
+
                             <button
-                                key={r.id}
-                                type="button"
-                                onClick={() => setRole(r.id)}
-                                className={`p-4 rounded-xl border-2 transition-all ${
-                                    role === r.id 
-                                        ? 'border-[#1E3A8A] bg-[#1E3A8A]/5' 
-                                        : 'border-slate-200 hover:border-slate-300'
-                                }`}
+                                type="submit"
+                                disabled={loading}
+                                className="signin-btn"
+                                style={{
+                                    background: `linear-gradient(225deg, ${THEME.start}, ${THEME.stop})`,
+                                    border: "none", borderRadius: 8, color: "#fff",
+                                    cursor: loading ? "not-allowed" : "pointer",
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    fontSize: 16, fontWeight: 600, fontFamily: "Poppins, sans-serif",
+                                    padding: "14px 10px", width: "100%", gap: 8,
+                                    boxShadow: "0 6px 20px rgba(0,0,0,0.25)",
+                                    opacity: loading ? 0.7 : 1,
+                                }}
                             >
-                                <r.icon className={`w-6 h-6 mx-auto mb-2 ${
-                                    role === r.id ? 'text-[#1E3A8A]' : 'text-slate-400'
-                                }`} />
-                                <p className={`text-sm font-medium ${
-                                    role === r.id ? 'text-[#1E3A8A]' : 'text-slate-600'
-                                }`}>{r.label}</p>
+                                {loading ? 'Signing in...' : 'Login In'}
+                                {!loading && <ArrowIcon color="#fff" />}
                             </button>
-                        ))}
-                    </div>
+                        </form>
 
-                    <form onSubmit={handleLogin} className="space-y-5">
-                        <div>
-                            <Label htmlFor="email" className="text-slate-700">Email</Label>
-                            <div className="relative mt-1">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="Enter your email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="pl-11 h-12"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <Label htmlFor="password" className="text-slate-700">Password</Label>
-                            <div className="relative mt-1">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                                <Input
-                                    id="password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    placeholder="Enter your password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="pl-11 pr-11 h-12"
-                                    required
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                                >
-                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                            <label className="flex items-center gap-2">
-                                <input type="checkbox" className="rounded border-slate-300" />
-                                <span className="text-sm text-slate-600">Remember me</span>
-                            </label>
-                            <a href="#" className="text-sm text-[#1E3A8A] hover:underline">
-                                Forgot password?
-                            </a>
-                        </div>
-
-                        {error && (
-                            <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">
-                                {error}
-                            </div>
-                        )}
-
-                        <Button 
-                            type="submit" 
-                            className="w-full h-12 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-lg"
-                            disabled={loading}
-                        >
-                            {loading ? 'Signing in...' : 'Sign In'}
-                            {!loading && <ArrowRight className="ml-2 w-5 h-5" />}
-                        </Button>
-                    </form>
-
-                    <div className="mt-8 text-center">
-                        <p className="text-slate-600">
-                            Don't have an account?{' '}
-                            <Link to={createPageUrl('Register')} className="text-[#1E3A8A] font-medium hover:underline">
+                        <p style={{
+                            color: "rgba(255,255,255,0.3)", fontSize: 13,
+                            textAlign: "center", marginTop: 24,
+                        }}>
+                            Don't have an account?{" "}
+                            <Link to={createPageUrl('Register')} style={{
+                                color: "rgba(255,255,255,0.65)", cursor: "pointer",
+                                textDecoration: "none", fontWeight: 600,
+                            }}>
                                 Sign up
                             </Link>
                         </p>
                     </div>
 
-                    {/* Demo Credentials */}
-                    <div className="mt-6 p-4 bg-slate-50 rounded-xl">
-                        <p className="text-xs text-slate-500 text-center mb-2">Demo Mode</p>
-                        <p className="text-xs text-slate-600 text-center">
-                            Click "Sign In" with any credentials to access the dashboard for the selected role.
-                        </p>
-                    </div>
-                </Card>
-
-                <p className="text-center text-sm text-slate-500 mt-6">
-                    By signing in, you agree to our{' '}
-                    <a href="#" className="text-[#1E3A8A] hover:underline">Terms</a> and{' '}
-                    <a href="#" className="text-[#1E3A8A] hover:underline">Privacy Policy</a>
-                </p>
+                </div>
             </div>
-        </div>
+        </>
     );
 }

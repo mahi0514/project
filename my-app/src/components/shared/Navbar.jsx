@@ -4,6 +4,7 @@ import { Button } from "C:/Users/USER/sponza/project/my-app/src/components/ui/bu
 import { Menu, X } from 'lucide-react';
 import { createPageUrl } from "C:/Users/USER/sponza/project/my-app/src/utils";
 
+
 export default function Navbar({ isAuthenticated, onLogout, userRole }) {
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 

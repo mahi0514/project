@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
     LayoutDashboard, Users, Calendar, FileText, 
-    BarChart3, Settings, TrendingUp, DollarSign, 
-    Building2, GraduationCap, AlertCircle
+    BarChart3, DollarSign, 
+    Building2, GraduationCap, AlertCircle, Lock
 } from 'lucide-react';
 
 import { createPageUrl } from 'C:/Users/USER/sponza/project/my-app/src/utils';
@@ -18,27 +18,167 @@ import { Badge } from "C:/Users/USER/sponza/project/my-app/src/components/ui/bad
 import { dummyAdminStats, allUsers, dummyEvents } 
 from 'C:/Users/USER/sponza/project/my-app/src/components/data/dummyData';
 
+const SECRET = 'sponza@admin123';
+
+function PassphraseGate({ onUnlock }) {
+    const [pass, setPass] = useState('');
+    const [error, setError] = useState('');
+    const [shake, setShake] = useState(false);
+
+    const attempt = () => {
+        if (pass === SECRET) {
+            onUnlock();
+        } else {
+            setError('Wrong passphrase. Access denied.');
+            setShake(true);
+            setPass('');
+            setTimeout(() => setShake(false), 500);
+        }
+    };
+
+    return (
+        <>
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+                @keyframes shake {
+                    0%,100%{transform:translateX(0)}
+                    20%{transform:translateX(-8px)}
+                    40%{transform:translateX(8px)}
+                    60%{transform:translateX(-6px)}
+                    80%{transform:translateX(6px)}
+                }
+                .shake { animation: shake 0.4s ease; }
+                .gate-input::placeholder { color: rgba(255,255,255,0.35); }
+                .gate-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+                .gate-btn { transition: all 200ms; }
+            `}</style>
+            <div style={{
+                minHeight: "100vh", display: "flex", alignItems: "center",
+                justifyContent: "center", background: "#00052d",
+                fontFamily: "Poppins, sans-serif",
+            }}>
+                <div
+                    className={shake ? 'shake' : ''}
+                    style={{
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        borderRadius: 16, padding: "48px 40px",
+                        width: "min(420px, 90vw)", textAlign: "center",
+                        boxShadow: "0 32px 80px rgba(0,0,0,0.4)",
+                    }}
+                >
+                    <div style={{
+                        width: 56, height: 56, borderRadius: 14,
+                        background: "linear-gradient(225deg, #004e92, #000d7a)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        margin: "0 auto 20px",
+                        boxShadow: "0 8px 24px rgba(0,78,146,0.4)",
+                    }}>
+                        <Lock size={26} color="#fff" />
+                    </div>
+
+                    <h2 style={{
+                        color: "rgba(255,255,255,0.9)", fontSize: 22,
+                        fontWeight: 700, marginBottom: 6,
+                    }}>
+                        Admin Access
+                    </h2>
+                    <p style={{
+                        color: "rgba(255,255,255,0.4)", fontSize: 13,
+                        marginBottom: 28,
+                    }}>
+                        Enter the passphrase to continue
+                    </p>
+
+                    <input
+                        type="password"
+                        className="gate-input"
+                        value={pass}
+                        onChange={e => { setPass(e.target.value); setError(''); }}
+                        onKeyDown={e => e.key === 'Enter' && attempt()}
+                        placeholder="Enter passphrase"
+                        style={{
+                            width: "100%", padding: "13px 16px",
+                            borderRadius: 8, fontSize: 15,
+                            background: "rgba(0,0,0,0.4)",
+                            border: `1px solid ${error ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.08)'}`,
+                            color: "rgba(255,255,255,0.85)",
+                            outline: "none", marginBottom: 12,
+                            fontFamily: "Poppins, sans-serif",
+                            boxSizing: "border-box",
+                            transition: "border 200ms",
+                        }}
+                    />
+
+                    {error && (
+                        <p style={{
+                            color: "#f87171", fontSize: 13,
+                            marginBottom: 12, textAlign: "left",
+                        }}>
+                            {error}
+                        </p>
+                    )}
+
+                    <button
+                        onClick={attempt}
+                        className="gate-btn"
+                        style={{
+                            width: "100%", padding: "13px",
+                            background: "linear-gradient(225deg, #004e92, #000d7a)",
+                            border: "none", borderRadius: 8,
+                            color: "#fff", fontSize: 15, fontWeight: 600,
+                            fontFamily: "Poppins, sans-serif",
+                            cursor: "pointer",
+                            boxShadow: "0 6px 20px rgba(0,0,0,0.3)",
+                        }}
+                    >
+                        Enter Admin Panel
+                    </button>
+                </div>
+            </div>
+        </>
+    );
+}
+
 export default function AdminPanel() {
     const navigate = useNavigate();
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [user, setUser] = useState(null);
 
+    // ✅ Check sessionStorage on load so refresh doesn't re-lock
+    const [unlocked, setUnlocked] = useState(
+        sessionStorage.getItem('admin_unlocked') === 'true'
+    );
+
+    // ✅ Save to sessionStorage + localStorage when unlocked
+    const handleUnlock = () => {
+        sessionStorage.setItem('admin_unlocked', 'true');
+        const adminUser = {
+            id: 'admin-1',
+            name: 'Admin',
+            email: 'admin@sponza.com',
+            role: 'admin',
+        };
+        localStorage.setItem('sponza_auth', JSON.stringify(adminUser));
+        setUser(adminUser);
+        setUnlocked(true);
+    };
+
     useEffect(() => {
-        const auth = localStorage.getItem('sponza_auth');
-        if (!auth) {
-            navigate(createPageUrl('SignIn'));
-            return;
+        if (unlocked) {
+            const auth = localStorage.getItem('sponza_auth');
+            if (auth) {
+                const parsed = JSON.parse(auth);
+                if (parsed.role === 'admin') {
+                    setUser(parsed);
+                }
+            }
         }
-        const parsed = JSON.parse(auth);
-        if (parsed.role !== 'admin') {
-            navigate(createPageUrl('Home'));
-            return;
-        }
-        setUser(parsed);
-    }, [navigate]);
+    }, [unlocked]);
 
     const handleLogout = () => {
         localStorage.removeItem('sponza_auth');
+        sessionStorage.removeItem('admin_unlocked'); // ✅ Clear session on logout
         navigate(createPageUrl('Home'));
     };
 
@@ -59,6 +199,11 @@ export default function AdminPanel() {
 
     const recentUsers = allUsers.slice(0, 5);
     const recentEvents = dummyEvents.slice(0, 4);
+
+    // ✅ Show gate if not unlocked
+    if (!unlocked) {
+        return <PassphraseGate onUnlock={handleUnlock} />;
+    }
 
     if (!user) return null;
 
@@ -96,7 +241,6 @@ export default function AdminPanel() {
                             <Card className="p-6">
                                 <h2 className="text-xl font-bold text-[#1F2937] mb-6">User Distribution</h2>
                                 <div className="space-y-4">
-
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -111,14 +255,10 @@ export default function AdminPanel() {
                                             {Math.round(dummyAdminStats.totalColleges / dummyAdminStats.totalUsers * 100)}%
                                         </span>
                                     </div>
-
                                     <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                                        <div 
-                                            className="h-full bg-blue-500 rounded-full"
-                                            style={{ width: `${dummyAdminStats.totalColleges / dummyAdminStats.totalUsers * 100}%` }}
-                                        />
+                                        <div className="h-full bg-blue-500 rounded-full"
+                                            style={{ width: `${dummyAdminStats.totalColleges / dummyAdminStats.totalUsers * 100}%` }} />
                                     </div>
-
                                     <div className="flex items-center justify-between mt-6">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -133,14 +273,10 @@ export default function AdminPanel() {
                                             {Math.round(dummyAdminStats.totalSponsors / dummyAdminStats.totalUsers * 100)}%
                                         </span>
                                     </div>
-
                                     <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                                        <div 
-                                            className="h-full bg-green-500 rounded-full"
-                                            style={{ width: `${dummyAdminStats.totalSponsors / dummyAdminStats.totalUsers * 100}%` }}
-                                        />
+                                        <div className="h-full bg-green-500 rounded-full"
+                                            style={{ width: `${dummyAdminStats.totalSponsors / dummyAdminStats.totalUsers * 100}%` }} />
                                     </div>
-
                                 </div>
                             </Card>
 
@@ -175,7 +311,6 @@ export default function AdminPanel() {
                                         <Button variant="ghost" className="text-[#1E3A8A]">View All</Button>
                                     </Link>
                                 </div>
-
                                 <div className="space-y-4">
                                     {recentUsers.map((u) => (
                                         <div key={u.id} className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg">
@@ -206,7 +341,6 @@ export default function AdminPanel() {
                                         <Button variant="ghost" className="text-[#1E3A8A]">View All</Button>
                                     </Link>
                                 </div>
-
                                 <div className="space-y-4">
                                     {recentEvents.map((event) => (
                                         <div key={event.id} className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-lg">
@@ -225,7 +359,6 @@ export default function AdminPanel() {
                                 </div>
                             </Card>
                         </div>
-
                     </div>
                 </main>
             </div>

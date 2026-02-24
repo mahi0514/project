@@ -12,10 +12,8 @@ export default function Footer() {
                     {/* Brand */}
                     <div>
                         <div className="flex items-center gap-2 mb-4">
-                            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                                <Sparkles className="w-6 h-6 text-[#22C55E]" />
-                            </div>
-                            <span className="text-2xl font-bold">Sponza</span>
+                            
+                            <span className="text-2xl font-bold">SPONZA</span>
                         </div>
                         <p className="text-blue-200 leading-relaxed">
                             Connecting college event organizers with sponsors to create memorable experiences.
@@ -36,7 +34,7 @@ export default function Footer() {
                     {/* Quick Links */}
                     <div>
                         <h4 className="font-semibold text-lg mb-4">Quick Links</h4>
-                        <ul className="space-y-3">
+                        <ul className="space-y-2">
                             <li>
                                 <Link to={createPageUrl('Home')} className="text-blue-200 hover:text-white transition-colors">
                                     Home
@@ -62,8 +60,7 @@ export default function Footer() {
 
                     {/* For Users */}
                     <div>
-                        <h4 className="font-semibold text-lg mb-4">For Users</h4>
-                        <ul className="space-y-3">
+                        {/* <ul className="space-y-3">
                             <li>
                                 <a href="#" className="text-blue-200 hover:text-white transition-colors">
                                     For Colleges
@@ -84,7 +81,7 @@ export default function Footer() {
                                     FAQ
                                 </a>
                             </li>
-                        </ul>
+                        </ul> */}
                     </div>
 
                     {/* Contact */}
@@ -112,7 +109,7 @@ export default function Footer() {
 
                 <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-blue-200 text-sm">
-                        © 2024 Sponza. All rights reserved.
+                        © 2026 Sponza. All rights reserved.
                     </p>
                     <div className="flex gap-6 text-sm">
                         <a href="#" className="text-blue-200 hover:text-white transition-colors">Privacy Policy</a>

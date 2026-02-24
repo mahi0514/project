@@ -39,11 +39,13 @@ export default function AdminEvents() {
     useEffect(() => {
         const auth = localStorage.getItem('sponza_auth');
         if (!auth) {
-            navigate(createPageUrl('SignIn'));
+            // ✅ No session — send back to AdminPanel to unlock via passphrase
+            navigate(createPageUrl('AdminPanel'));
             return;
         }
         const parsed = JSON.parse(auth);
         if (parsed.role !== 'admin') {
+            // ✅ Not admin — send home
             navigate(createPageUrl('Home'));
             return;
         }

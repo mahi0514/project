@@ -78,14 +78,11 @@ export default function Home() {
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         <div className="text-white">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full mb-6 backdrop-blur-sm">
-                                <Sparkles className="w-4 h-4 text-[#22C55E]" />
-                                <span className="text-sm font-medium">The #1 Sponsorship Platform</span>
-                            </div>
+                            
                             
                             <h1 className="text-4xl lg:text-6xl font-bold leading-tight mb-6">
-                                Sponza — Connecting 
-                                <span className="text-[#22C55E]"> Ideas </span>
+                                SPONZA — Connecting 
+                                <span className="text-[skyblue]"> Ideas </span>
                                 with Sponsors
                             </h1>
                             
@@ -212,11 +209,6 @@ export default function Home() {
                         Join hundreds of colleges and sponsors already using Sponza to create meaningful partnerships.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link to={createPageUrl('Register')}>
-                            <Button size="lg" className="bg-[#22C55E] hover:bg-[#22C55E]/90 text-white px-8 h-14 text-lg">
-                                Start Free Trial
-                            </Button>
-                        </Link>
                         <Link to={createPageUrl('About')}>
                             <Button size="lg" variant="outline" className="border-white text-blue-500 hover:bg-white hover:text-[#1E3A8A] px-8 h-14 text-lg">
                                 Learn More
