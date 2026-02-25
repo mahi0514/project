@@ -153,4 +153,54 @@ app.get('/delOrganization/:id',(req,res)=>{
   });
 });
 
+app.get('/getAllSponsors', async (req, res) => {
+  var res = await db.all('SELECT * FROM USER, SPONSOR WHERE USER.ID = SPONSOR.ID', (err, rows) => {
+    if (err) res.status(500).json({message: err});
+    else res.status(200).json(rows);
+  });
+})
+
+app.get('/getAllOrganizations', async (req, res) => {
+  var res = await db.all('SELECT * FROM USER, ORGANIZATION WHERE USER.ID = ORGANIZATION.ID', (err, rows) => {
+    if (err) res.status(500).json({message: err});
+    if (rows.length === 0) res.status(404).json({message: 'No organizations found!'});
+    else res.status(200).json(rows);
+  });
+});
+
+app.get('/getPosts/', async (req, res) => {
+  var res = await db.all('SELECT * FROM POST', (err, rows) => {
+    if (err) res.status(500).json({message: err});
+    else res.status(200).json(rows);
+  });
+});
+
+app.post('/addPost', async (req, res) => {
+  const { title, description, sponsorID } = req.body;
+  var res = await db.run("INSERT INTO POST(Title, Description, SponsorID) values (?, ?, ?)", [title, description, sponsorID], (err) => {
+    if (err) {
+      return res.status(500).json({message: err});
+    } else {
+      res.status(200).json({message: 'Post added successfully'});
+    }
+  });
+});
+
+app.delete('/removePPost/:id', async (req, res) => {
+  const ID = req.params.id;
+  var res = await db.run("DELETE FROM POST WHERE PostID = ?", [ID], (err) => {
+    if (err) res.status(500).json({message: err});
+    res.status(200).json({message: 'Success'});
+  });
+});
+
+app.get('/getPostDetails/:id', async (req, res) => {
+  const ID = req.params.id;
+  var res = await db.get("SELECT * FROM POST WHERE POSTID = ?", [ID], (err, row) => {
+    if (err) res.status(500).json({message: err});
+    if (!row) res.status(404).json({message: 'Post not found!'});
+    else res.status(200).json(row);
+  });
+});
+
 app.listen(port);
